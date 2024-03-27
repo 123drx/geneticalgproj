@@ -1,6 +1,5 @@
 package daniel.finalproj.Objects;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,17 +11,26 @@ public class SchoolClass {
     private ArrayList<String> Teachers = new ArrayList<>();
     private ArrayList<Lesson> LockedLessons = new ArrayList<>();
 
+    public int getLockedLesson(String Name) {
+        for (int i = 0; i < LockedLessons.size(); i++) {
+            Lesson l = LockedLessons.get(i);
+            if (l.getLessonSubject().equals(Name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     public void adjustEmptySubject() {
         int MaxD = Schedule.MAX_DAY;
         int MaxH = Day.MAX_HOUR;
-        int EmptySubjectWeeklyHours = (MaxD * MaxH)-MaxD;
-        //EmptySubjectWeeklyHours -= MaxD;//Remove the amount of breaks in the schedule(every day 1 break)
+        int EmptySubjectWeeklyHours = (MaxD * MaxH) - MaxD;
+        // EmptySubjectWeeklyHours -= MaxD;//Remove the amount of breaks in the
+        // schedule(every day 1 break)
 
         for (Subject subject : subjects) {
-            if(!subject.getSubjectName().equals("Empty"))
-            {
-            EmptySubjectWeeklyHours -= subject.getWeeklyHours();
+            if (!subject.getSubjectName().equals("Empty")) {
+                EmptySubjectWeeklyHours -= subject.getWeeklyHours();
             }
         }
 
@@ -30,62 +38,70 @@ public class SchoolClass {
             Subject s = new Subject("Empty");
             s.setTeachersName("Non");
             s.setWeeklyHours(EmptySubjectWeeklyHours);
-            System.out.println("Empty Hours : "+ EmptySubjectWeeklyHours);
+            System.out.println("Empty Hours : " + EmptySubjectWeeklyHours);
             addSubject(s);
+        } else {
+            subjects.get(getSubjectIndex("Empty", "")).setWeeklyHours(EmptySubjectWeeklyHours);
+            System.out.println(subjects.get(getSubjectIndex("Empty", "")).getWeeklyHours() + "<- Empty Weekly Hours");
         }
-        else {
-            subjects.get(getSubjectIndex("Empty")).setWeeklyHours(EmptySubjectWeeklyHours);
-            System.out.println(subjects.get(getSubjectIndex("Empty")).getWeeklyHours() + "<- Empty Weekly Hours");
-        }
-        
-        
-        //System.out.println("Empty Hours : "+ EmptySubjectWeeklyHours);
+
+        // System.out.println("Empty Hours : "+ EmptySubjectWeeklyHours);
     }
-    public void printClass()
-    {
-        System.out.println("Class Name : "+ this.getClassName());
+
+    public int getteacherIndex(String Name) {
+        for (int i = 0; i < Teachers.size(); i++) {
+
+            if (Name.equals(Teachers.get(i))) {
+                return i;
+            }
+        }
+        return -1;
+
+    }
+
+    public void printClass() {
+        System.out.println("Class Name : " + this.getClassName());
         {
-            System.out.println("========================================Subjects : ========================================");
-            for(Subject subj : subjects)
-            {
+            System.out.println(
+                    "========================================Subjects : ========================================");
+            for (Subject subj : subjects) {
                 subj.printsubject();
             }
-            System.out.println("========================================Teachers : ========================================");
-            for(String teacher: Teachers)
-            {
+            System.out.println(
+                    "========================================Teachers : ========================================");
+            for (String teacher : Teachers) {
                 System.out.println(teacher);
             }
-            System.out.println("========================================Locked Lessons========================================");
-            for(Lesson l : LockedLessons)
-            {
+            System.out.println(
+                    "========================================Locked Lessons========================================");
+            for (Lesson l : LockedLessons) {
                 l.printLockedLesson();
             }
         }
     }
 
-   public Subject getSubject(String SubjectName)
-   {
-    for(Subject subject : subjects)
-    {
-        if(subject.getSubjectName().equals(SubjectName))
-        return subject;
+    public Subject getSubject(String SubjectName) {
+        for (Subject subject : subjects) {
+            if (subject.getSubjectName().equals(SubjectName))
+                return subject;
+        }
+        return null;
     }
-    return null;
-   }
 
-    public void printSubjectsweeklyhours()
-    {
+    public void printSubjectsweeklyhours() {
         String s = "";
-        for(Subject subj : subjects) 
-        {
-            s += subj.getSubjectName() + " : " + "Hours : "+ subj.getWeeklyHours() +"\t"; 
-        }       
+        for (Subject subj : subjects) {
+            s += subj.getSubjectName() + " : " + "Hours : " + subj.getWeeklyHours() + "\t";
+        }
         System.out.println(s);
     }
 
-    public int getSubjectIndex(String SubjectName) {
+    public int getSubjectIndex(String SubjectName, String TeachersName) {
         for (int i = 0; i < subjects.size(); i++) {
-            if (subjects.get(i).getSubjectName().equals(SubjectName)) {
+            if (subjects.get(i).getSubjectName().equals("Empty")) {
+                return i;
+            } else if (subjects.get(i).getSubjectName().equals(SubjectName)
+                    && subjects.get(i).getTeachersName().equals(TeachersName)) {
                 return i;
             }
         }
@@ -94,26 +110,23 @@ public class SchoolClass {
 
     public boolean IsSubjectExist(Subject SubjectName) {
         for (Subject subject : subjects) {
-            if (SubjectName.getSubjectName().equals(subject.getSubjectName())&&SubjectName.getTeachersName().equals(subject.getTeachersName())) {
+            if (SubjectName.getSubjectName().equals(subject.getSubjectName())
+                    && SubjectName.getTeachersName().equals(subject.getTeachersName())) {
                 return true;
             }
         }
         return false;
     }
 
-    public ArrayList<Subject> getTeachersSubjectsInClass(String TeachersName)
-    {
+    public ArrayList<Subject> getTeachersSubjectsInClass(String TeachersName) {
         ArrayList<Subject> subjs = new ArrayList<>();
-        for(Subject s : this.getSubjects())
-        {
-            if(s.getTeachersName().equals(TeachersName))
-            {
+        for (Subject s : this.getSubjects()) {
+            if (s.getTeachersName().equals(TeachersName)) {
                 subjs.add(s);
             }
         }
         return subjs;
     }
-
 
     public void addLockedLesson(Lesson lesson) {
         lesson.setClassName(className);
@@ -151,7 +164,6 @@ public class SchoolClass {
         }
         return false;
     }
-
 
     public SchoolClass(String Name) {
         this.className = Name;
@@ -218,8 +230,6 @@ public class SchoolClass {
     public void setTeachers(ArrayList<String> teachers) {
         Teachers = teachers;
     }
-
-    
 
     public List<Lesson> getLockedLessons() {
         return LockedLessons;

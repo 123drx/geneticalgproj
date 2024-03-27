@@ -15,12 +15,12 @@ import daniel.finalproj.Objects.Subject;
 public class GeneticAlgorithm {
 
     private static final int POPULATION_SIZE = 400;
-    private static int MAX_GENERATIONS = 400;
-    private static double HALFMUTATION_RATE = 0.80;
-    private static double MUTATION_RATE = 0.65;
-    private static double BIGMUTATION_RATE = 0.45;
-    private static int SavePrecent = 2; // what precentage of the population will Save
-    private static int AfterCrossOverMutationPrecent = 85; // what precentage of the population will mutate
+    private static int MAX_GENERATIONS = 100;
+    private static double HALFMUTATION_RATE = 0.35;
+    private static double MUTATION_RATE = 1;
+    private static double BIGMUTATION_RATE = 0.70;
+    private static int SavePrecent = 15; // what precentage of the population will Save
+    private static int AfterCrossOverMutationPrecent = 90; // what precentage of the population will mutate
     private static int MutateWitoutCrossOver = 0; // what precentage of the population will mutate
 
     public School Geneticalgorithm(School school) {
@@ -44,18 +44,15 @@ public class GeneticAlgorithm {
                         School parent1 = new School();
                         parent1.tournamentSelection(population, Fitnesses, SortedIndexes);
                         int mutationkind = rand.nextInt(3);
-                        double randomNumber = (double) rand.nextInt(101) / 100;
-                        double randomNumber2 = (double) rand.nextInt(101);
-                        if (randomNumber2 < AfterCrossOverMutationPrecent) {
-                            if (mutationkind == 0) {
-                                parent1.BigMutate(parent1.getallSubjects());
-                            }
-                            if (mutationkind == 1) {
-                                parent1.Mutate(parent1.getallSubjects());
-                            } else {
-                                parent1.halfMutate(parent1.getallSubjects());
-                            }
+                        if (mutationkind == 0) {
+                            parent1.BigMutate(parent1.getallSubjects());
                         }
+                        if (mutationkind == 1) {
+                            parent1.Mutate(parent1.getallSubjects());
+                        } else {
+                            parent1.halfMutate(parent1.getallSubjects());
+                        }
+
                         newPopulation.add(parent1);
 
                     } else {
@@ -68,24 +65,20 @@ public class GeneticAlgorithm {
                         }
                         School child = new School(parent1);
                         child.crossover(parent1, parent2);
-                        int mutationkind = rand.nextInt(3);
+                        // int mutationkind = rand.nextInt(3);
                         double randomNumber = (double) rand.nextInt(101) / 100;
-                        double randomNumber2 = (double) rand.nextInt(101);
+                        int randomNumber2 =  rand.nextInt(101);
                         if (randomNumber2 < AfterCrossOverMutationPrecent) {
-                            if (mutationkind == 0) {
-                                if (randomNumber < BIGMUTATION_RATE) {
-                                    child.BigMutate(child.getallSubjects());
-                                }
+                            if (randomNumber < BIGMUTATION_RATE) {
+                                child.BigMutate(child.getallSubjects());
                             }
-                            if (mutationkind == 1) {
-                                if (randomNumber < MUTATION_RATE) {
-                                    child.Mutate(child.getallSubjects());
-                                }
-                            } else {
-                                if (randomNumber < HALFMUTATION_RATE) {
-                                    child.halfMutate(child.getallSubjects());
-                                }
+                            if (randomNumber < MUTATION_RATE) {
+                                child.Mutate(child.getallSubjects());
                             }
+                            if (randomNumber < HALFMUTATION_RATE) {
+                                child.halfMutate(child.getallSubjects());
+                            }
+
                         }
                         newPopulation.add(child);
                     }

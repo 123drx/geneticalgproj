@@ -30,6 +30,16 @@ public class Teacher {
         daysOfWeekMap.put(3, "Wednesday");
         daysOfWeekMap.put(4, "Thursday");
     }
+    public boolean isSubjectExist(String s)
+    {
+        for (Subject sub : Subjects) {
+            if(s.equals(sub.getSubjectName()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public Teacher(Teacher otherTeacher) {
         this.name = otherTeacher.name;
@@ -69,6 +79,8 @@ public class Teacher {
         s+= "\n";
         System.out.println(s);
     }
+
+    
 
     public Constrains[] getConstrains() {
         int starthour = 0;

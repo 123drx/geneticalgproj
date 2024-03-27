@@ -36,7 +36,11 @@ public class CreateSchoolPage extends VerticalLayout {
         realname = (String) VaadinSession.getCurrent().getSession().getAttribute("RealName");
         userName = (String) VaadinSession.getCurrent().getSession().getAttribute("username");
         password = (String) VaadinSession.getCurrent().getSession().getAttribute("password");
-        this.ThisPrinciple = principleServies.findbyname(realname);
+        ThisPrinciple = principleServies.findbyname(realname);
+        if(ThisPrinciple.getSchool()!=null)
+        {
+            routeToSchoolPagePage();
+        }
 
 
         H2 Title = new H2("You Are Not Connected To A School Yet");
@@ -89,7 +93,7 @@ public class CreateSchoolPage extends VerticalLayout {
 
    
    private void routeToSchoolPagePage() {
-    UI.getCurrent().getPage().setLocation("/Principle");
+    UI.getCurrent().getPage().setLocation("/SchoolPage");
 }
 
 }

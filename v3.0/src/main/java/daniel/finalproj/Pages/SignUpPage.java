@@ -208,7 +208,7 @@ public class SignUpPage extends VerticalLayout {
 
    // Route to Chat Page ('/chat')
    private void routeToPrinciplePage() {
-      UI.getCurrent().getPage().setLocation("/Principle");
+      UI.getCurrent().getPage().setLocation("/CreateSchool");
    }
 
    private void routeToLoginPage() {

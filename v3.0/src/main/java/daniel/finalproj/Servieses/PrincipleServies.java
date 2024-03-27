@@ -1,5 +1,6 @@
 package daniel.finalproj.Servieses;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -12,15 +13,31 @@ import daniel.finalproj.Repositorys.PrincipleRepository;
 @Service
 public class PrincipleServies 
 {
+   
     private PrincipleRepository Prepo;
+
+    private ArrayList<PrincipleChangeListener> listeners;
+
+    public interface PrincipleChangeListener {
+        public void onChange();
+    }
     
     public PrincipleServies(PrincipleRepository Screpo)
     {
         this.Prepo = Screpo;
+        listeners = new ArrayList<PrincipleChangeListener>();
     }
+
+
 
     public void InsertPrincple(Principle s )
     {
+        synchronized(listeners){
+            for(PrincipleChangeListener listener : listeners)
+            {
+                listener.onChange();
+            }
+        }
         Prepo.insert(s);
     }
 
@@ -48,6 +65,13 @@ public class PrincipleServies
    public List<Principle> getAllScheduals()
    {
       return Prepo.findAll();
+   }
+
+   public void AddPrincipleChangeListener(PrincipleChangeListener listener)
+   {
+    synchronized(listeners){
+        listeners.add(listener);
+    }
    }
 
     

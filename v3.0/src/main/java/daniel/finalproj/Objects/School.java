@@ -118,7 +118,7 @@ public class School {
                     Lesson s = new Lesson("BreakFast", "Non", day, hour);
                     for (int i = 0; i < Classes.size(); i++) {
                         s.setClassName(Classes.get(i).getClassName());
-                        schedule.getDays()[day].getHours()[hour].addlesson(s);    
+                        schedule.getDays()[day].getHours()[hour].addlesson(s);
                     }
 
                 }
@@ -156,24 +156,39 @@ public class School {
         int RundomSubjectIndex;
         int RandomHour;
         Random rand = new Random();
-       
-            randomDay = rand.nextInt(Schedule.MAX_DAY);
+
+        randomDay = rand.nextInt(Schedule.MAX_DAY);
+        RandomHour = rand.nextInt(Day.MAX_HOUR);
+        while (RandomHour == Day.LUNCH_HOUR - Day.STARTING_HOUR) {
             RandomHour = rand.nextInt(Day.MAX_HOUR);
-            while (RandomHour == Day.LUNCH_HOUR - Day.STARTING_HOUR) {
-                RandomHour = rand.nextInt(Day.MAX_HOUR);
 
-            }
-            int randomclass = rand.nextInt(subjects.size());
+        }
+        int randomclass = rand.nextInt(subjects.size());
+        RundomSubjectIndex = rand.nextInt(subjects.get(randomclass).size());
+        while(isLessonElapses(subjects.get(randomclass).get(RundomSubjectIndex),randomDay,RandomHour,randomclass))
+        {
             RundomSubjectIndex = rand.nextInt(subjects.get(randomclass).size());
-            Lesson lesson = new Lesson(subjects.get(randomclass).get(RundomSubjectIndex).getSubjectName(),
-                    subjects.get(randomclass).get(RundomSubjectIndex).getTeachersName(), Classes.get(randomclass).getClassName());
-            s.getDays()[randomDay].getHours()[RandomHour].getLessons().set(randomclass, lesson);
+        }
+        Lesson lesson = new Lesson(subjects.get(randomclass).get(RundomSubjectIndex).getSubjectName(),
+                subjects.get(randomclass).get(RundomSubjectIndex).getTeachersName(),
+                Classes.get(randomclass).getClassName());
+        s.getDays()[randomDay].getHours()[RandomHour].getLessons().set(randomclass, lesson);
 
-        
         this.schedule = s;
         return s;
     }
-    
+
+    public boolean isLessonElapses(Subject s , int day , int hour , int classindex)
+    {
+        for(Lesson l : schedule.getDays()[day].getHours()[hour].getLessons())
+        {
+            if(l.getLessonSubject().equals(s.getSubjectName())&&l.getTeacher().equals(s.getTeachersName()))
+            {
+                return true;
+            }
+        }
+            return false;
+    }
 
     public Schedule BigMutate(ArrayList<ArrayList<Subject>> subjects) {
         Schedule s = new Schedule(this.getSchedule());
@@ -281,10 +296,10 @@ public class School {
         return count;
     }
 
-    public double CountLockedBreaks(String ClassName) {
-        int count = 0;
+    public double EvalLockedBreaks(String ClassName) {
+        double count = 0;
         int ClassINdex = getClassIndexByName(ClassName);
-        int worstOption=getClasses().get(ClassINdex).getLockedLessons().size();
+        double worstOption = getClasses().get(ClassINdex).getLockedLessons().size();
         for (Lesson lesson : getClasses().get(ClassINdex).getLockedLessons()) {
             Lesson l = this.schedule.getDays()[lesson.getDay()].getHours()[lesson.getHour()].getLessons()
                     .get(ClassINdex);
@@ -296,40 +311,54 @@ public class School {
             }
 
         }
-        if(count ==0)
-        {
+        if (worstOption == 0) {
             return 0;
-        }
-        else
-        {
-            return ((count/worstOption)*100);
+        } else {
+            return ((count / worstOption) * 100);
         }
     }
 
-    
+    public int CountLockedBreaks(String ClassName) {
+        int count = 0;
+        int ClassINdex = getClassIndexByName(ClassName);
+        int worstOption = getClasses().get(ClassINdex).getLockedLessons().size();
+        for (Lesson lesson : getClasses().get(ClassINdex).getLockedLessons()) {
+            Lesson l = this.schedule.getDays()[lesson.getDay()].getHours()[lesson.getHour()].getLessons()
+                    .get(ClassINdex);
+            if (l.getClassName().equals(lesson.getClassName())) {
+                if (!l.getLessonSubject().equals(lesson.getLessonSubject())
+                        && !l.getTeacher().equals(lesson.getTeacher())) {
+                    count++;
+                }
+            }
+
+        }
+        return count;
+    }
+
     public void printEvaluation() {
         String s = "Evaluation for School : " + SchoolName + "\n";
 
         double hourmismutchs = CountTeachersHourMisMutch();
-        s += "Hour Mismutches : " + hourmismutchs + "\n";
+        s += "Hour Mismutches : " + hourmismutchs + " Count : " + CountHourMisMutch() + "\n";
 
-        double Elapces = countElapces();
-        s += "Elapces : " + Elapces + "\n";
+        double Elapces = EvalElapces();
+        s += "Elapces : " + Elapces + " Count : " + countElapces() + "\n";
 
         for (SchoolClass clas : this.Classes) {
             String className = clas.getClassName();
-            s += " ================================ Class : " + className + " ================================\n";
+            s += "\n ================================ Class : " + className + " ================================\n";
 
             Double priority = EvaluatePriority(className);
             s += "Priority : " + priority + "\n";
-            double MidEmptys = CountEmptyClassInMidSchrdule(className);
-            s += "MidEmptys : " + MidEmptys + "\n";
+            double MidEmptys = EvalEmptyClassMidSchrdule(className);
+            s += "MidEmptys : " + MidEmptys + " Count : " + CountEmptyClassMidSchrdule(className) + "\n";
 
-            double LockedLessonsBreaks = CountLockedBreaks(className);
-            s += "LockedLessonsBreaks : " + LockedLessonsBreaks + "\n";
+            double LockedLessonsBreaks = EvalLockedBreaks(className);
+            s += "LockedLessonsBreaks : " + LockedLessonsBreaks + " Count : " + CountLockedBreaks(className) + "\n";
             double Distancescore = EvalWeeklyHours(className);
             List<Integer> Distances = WeeklyDistances(className);
-            s += "Distances : " +Distancescore+ "\n";
+            s += "Distances : " + Distancescore + "\n";
             s += "(";
             for (int distance : Distances) {
                 s += distance + ",";
@@ -357,32 +386,39 @@ public class School {
         double value = 100;
 
         double hourmismutchs = CountTeachersHourMisMutch();
-        double priority=0;
-        double MidEmptys=0;
-        double Distances=0;
-        double LockedLessonsBreaks=0;
-        double Elapces = countElapces();
+        double priority = 0;
+        double MidEmptys = 0;
+        double Distances = 0;
+        double LockedLessonsBreaks = 0;
+        double Elapces = EvalElapces();
         for (SchoolClass s : this.Classes) {
             String className = s.getClassName();
 
             priority += EvaluatePriority(className);
 
-            MidEmptys += CountEmptyClassInMidSchrdule(className);
+            MidEmptys += EvalEmptyClassMidSchrdule(className);
 
             Distances += EvalWeeklyHours(className);
 
-            LockedLessonsBreaks += CountLockedBreaks(className);
+            LockedLessonsBreaks += EvalLockedBreaks(className);
         }
-        priority = priority/Classes.size();
-        MidEmptys = MidEmptys/Classes.size();
-        Distances =Distances/Classes.size();
-        LockedLessonsBreaks = LockedLessonsBreaks/Classes.size();
-        //System.out.println("=------------------------------------------------------");
-        //System.out.println("priority " +priority+"MidEmptys "+MidEmptys+"Distances "+ +Distances+"LockedLessonsBreaks "+LockedLessonsBreaks+"hourmismutchs "+hourmismutchs+"Elapces " +Elapces);
-        // value = 100-(hourmismutchs * 0.3 + Elapces * 0.3 + Distances * 0.2 +MidEmptys * 0.1 + priority * 0.1 +LockedLessonsBreaks * 0.1 );
-        double val1 = (hourmismutchs*0.5 + Elapces*0.4+Distances*0.1);
-        double val2 = ( Distances*0.35+hourmismutchs*0.35 + MidEmptys*0.13 + priority*0.08 + LockedLessonsBreaks*0.09);
-        value =100 - (val1*0.75 + val2*0.25);
+        priority = priority / Classes.size();
+        MidEmptys = MidEmptys / Classes.size();
+        Distances = Distances / Classes.size();
+        LockedLessonsBreaks = LockedLessonsBreaks / Classes.size();
+        // System.out.println("=------------------------------------------------------");
+        // System.out.println("priority " +priority+"MidEmptys "+MidEmptys+"Distances "+
+        // +Distances+"LockedLessonsBreaks "+LockedLessonsBreaks+"hourmismutchs
+        // "+hourmismutchs+"Elapces " +Elapces);
+        // value = 100-(hourmismutchs * 0.3 + Elapces * 0.3 + Distances * 0.2 +MidEmptys
+        // * 0.1 + priority * 0.1 +LockedLessonsBreaks * 0.1 );
+        double val1 = (hourmismutchs * 0.45 + Elapces * 0.4 + Distances * 0.15);
+        double val2 = (Distances * 0.35 + hourmismutchs * 0.35 + MidEmptys * 0.13 + priority * 0.08
+                + LockedLessonsBreaks * 0.09);
+        value = 100 - (val1 * 0.75 + val2 * 0.25);
+        if (hourmismutchs > 0)
+            value -= 25;
+
         return value;
     }
 
@@ -435,62 +471,64 @@ public class School {
     }
 
     // public Double EvaluatePriority(String ClassName) {
-    //     Double d = 0.0;
-    //     for (int day = 0; day < Schedule.MAX_DAY; day++) {
-    //         for (int hour = 0; hour < Day.MAX_HOUR; hour++) {
-    //             if (hour != Day.LUNCH_HOUR - Day.STARTING_HOUR) {
-    //                 for (Lesson l : this.schedule.getDays()[day].getHours()[hour].getLessons()) {
-    //                     if (!l.getLessonSubject().equals("Empty")) {
-    //                         Teacher currentTeacher = getTeacherByName(l.getTeacher());
-    //                         if (l.getClassName() == null) {
-    //                             printSchool();
-    //                             System.out.println("RealPrint");
-    //                             l.printlesson();
-    //                             System.out.println("Day : " + day + "Hour : " + hour);
-    //                         }
-    //                         Subject s = getSubject(l.getClassName(), l.getLessonSubject());
-    //                         ArrayList<Cords> cordinats = currentTeacher.GetAvaliability();
-    //                         int priority = s.getPriority();
-    //                         int classindex = getClassIndexByName(ClassName);
-    //                         if (priority > 3 || priority < 3) {
-    //                             for (Cords cords : cordinats) {
-    //                                 if (!schedule.getDays()[cords.getDay()].getHours()[cords.getHour()].getLessons()
-    //                                         .get(classindex).getTeacher().equals(l.getTeacher())) {
-    //                                     if (!schedule.getDays()[cords.getDay()].getHours()[cords.getHour()].getLessons()
-    //                                             .get(classindex).getLessonSubject().equals(l.GetLesson())) {
-    //                                         if (priority == 1) {
-    //                                             d += 1.5;
-    //                                         } else if (priority == 2) {
-    //                                             d += 1;
-    //                                         } else if (priority == 4) {
-    //                                             d += 1;
-    //                                         } else if (priority == 5) {
-    //                                             d += 1.5;
-    //                                         }
-    //                                     }
-    //                                 }
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return d;
+    // Double d = 0.0;
+    // for (int day = 0; day < Schedule.MAX_DAY; day++) {
+    // for (int hour = 0; hour < Day.MAX_HOUR; hour++) {
+    // if (hour != Day.LUNCH_HOUR - Day.STARTING_HOUR) {
+    // for (Lesson l : this.schedule.getDays()[day].getHours()[hour].getLessons()) {
+    // if (!l.getLessonSubject().equals("Empty")) {
+    // Teacher currentTeacher = getTeacherByName(l.getTeacher());
+    // if (l.getClassName() == null) {
+    // printSchool();
+    // System.out.println("RealPrint");
+    // l.printlesson();
+    // System.out.println("Day : " + day + "Hour : " + hour);
+    // }
+    // Subject s = getSubject(l.getClassName(), l.getLessonSubject());
+    // ArrayList<Cords> cordinats = currentTeacher.GetAvaliability();
+    // int priority = s.getPriority();
+    // int classindex = getClassIndexByName(ClassName);
+    // if (priority > 3 || priority < 3) {
+    // for (Cords cords : cordinats) {
+    // if
+    // (!schedule.getDays()[cords.getDay()].getHours()[cords.getHour()].getLessons()
+    // .get(classindex).getTeacher().equals(l.getTeacher())) {
+    // if
+    // (!schedule.getDays()[cords.getDay()].getHours()[cords.getHour()].getLessons()
+    // .get(classindex).getLessonSubject().equals(l.GetLesson())) {
+    // if (priority == 1) {
+    // d += 1.5;
+    // } else if (priority == 2) {
+    // d += 1;
+    // } else if (priority == 4) {
+    // d += 1;
+    // } else if (priority == 5) {
+    // d += 1.5;
+    // }
+    // }
+    // }
+    // }
+    // }
+    // }
+    // }
+    // }
+    // }
+    // }
+    // return d;
     // }
 
     public Double EvaluatePriority(String ClassName) {
         Double d = 0.0;
-        double worstoption1 =0;
-        double worstoption2 =0;
-        double count1 =0;
-        double count2 =0;
-        
+        double worstoption1 = 0;
+        double worstoption2 = 0;
+        double count1 = 0;
+        double count2 = 0;
+
         int ClassIndex = getClassIndexByName(ClassName);
         SchoolClass class1 = Classes.get(ClassIndex);
         for (Subject s : class1.getSubjects()) {
-            int c =0;
-            int c1 =0;
+            int c = 0;
+            int c1 = 0;
             int priority = s.getPriority();
             if (priority > 3 || priority < 3) {
                 Teacher teacher = getTeacherByName(s.getTeachersName());
@@ -503,26 +541,22 @@ public class School {
                                 && !schedule.getDays()[cords.getDay()].getHours()[cords.getHour()].getLessons()
                                         .get(ClassIndex)
                                         .getTeacher().equals(s.getTeachersName())) {
-                            if (priority == 1||priority == 5) {
-                                if(c==0)
-                                {
+                            if (priority == 1 || priority == 5) {
+                                if (c == 0) {
                                     c++;
-                                    worstoption1+=WeeklyHours;
+                                    worstoption1 += WeeklyHours;
                                 }
                                 count1++;
                             }
-                            if (priority == 2||priority == 4) {
-                                if(c1==0)
-                                {
+                            if (priority == 2 || priority == 4) {
+                                if (c1 == 0) {
                                     c1++;
-                                    worstoption2+=WeeklyHours;
+                                    worstoption2 += WeeklyHours;
                                 }
                                 count2++;
                             }
-                            
-                        }
-                        else
-                        {
+
+                        } else {
                             WeeklyHours--;
                         }
                     }
@@ -530,23 +564,17 @@ public class School {
 
             }
         }
-        if(worstoption1 == 0)
-        {
-            count1=0;
+        if (worstoption1 == 0) {
+            count1 = 0;
+        } else {
+            count1 = (count1 / worstoption1) * 100;
         }
-        else
-        {
-            count1 = (count1/worstoption1)*100;
+        if (worstoption2 == 0) {
+            count2 = 0;
+        } else {
+            count2 = (count2 / worstoption2) * 100;
         }
-        if(worstoption2 == 0)
-        {
-            count2=0;
-        }
-        else
-        {
-            count2 = (count2/worstoption2)*100;
-        }
-        d = count1*0.666+count2*0.334;
+        d = count1 * 0.666 + count2 * 0.334;
         return d;
     }
 
@@ -577,11 +605,13 @@ public class School {
         }
         return count;
     }
+
     public List<Integer> WeeklyDistances(String ClassName) {
         List<Integer> list = new ArrayList<>();
         for (Subject s : this.getClasses().get(getClassIndexByName(ClassName)).getSubjects()) {
             int count = CountWeeklyHours(s, ClassName);
             int ret = s.getWeeklyHours() - count;
+
             list.add(ret);
         }
 
@@ -590,38 +620,34 @@ public class School {
 
     public double EvalWeeklyHours(String ClassName) {
         List<Integer> WeeklyDistances = WeeklyDistances(ClassName);
-        double AllDistances=0;
-        int AllWeeklyHours =0;
-        double Eval =0;
+        double AllDistances = 0;
+        int AllWeeklyHours = 0;
+        double Eval = 0;
         for (Subject s : this.getClasses().get(getClassIndexByName(ClassName)).getSubjects()) {
             AllWeeklyHours += s.getWeeklyHours();
         }
-        for(int i : WeeklyDistances)
-        {
-            if(i>=0)
-            {
+        for (int i : WeeklyDistances) {
+            if (i >= 0) {
                 AllDistances += i;
-            }
-            else
-            {
+            } else {
                 AllDistances -= i;
             }
         }
-        Eval = ((AllDistances/AllWeeklyHours)*100);
+        Eval = ((AllDistances / AllWeeklyHours) * 100);
         return Eval;
     }
 
     public static ArrayList<Integer> countNonUnique(ArrayList<Lesson> lessons) {
         Map<String, Integer> lessonCountMap = new HashMap<>();
-        
+
         for (Lesson lesson : lessons) {
             String lessonKey = "" + lesson.getTeacher();
             lessonCountMap.put(lessonKey, lessonCountMap.getOrDefault(lessonKey, 0) + 1);
         }
-        
+
         Set<String> uniqueLessonKeys = new HashSet<>();
         ArrayList<Integer> nonUniqueCounts = new ArrayList<>();
-        
+
         for (Lesson lesson : lessons) {
             String lessonKey = "" + lesson.getTeacher();
             if (lessonCountMap.get(lessonKey) > 1 && !uniqueLessonKeys.contains(lessonKey)) {
@@ -629,7 +655,7 @@ public class School {
                 uniqueLessonKeys.add(lessonKey);
             }
         }
-        
+
         return nonUniqueCounts;
     }
 
@@ -637,10 +663,8 @@ public class School {
         Schedule s = getSchedule();
         int ret = 0;
         ArrayList<Lesson> list = s.getDays()[day].getHours()[hour].getLessons();
-        for(Lesson l : list)
-        {
-            if(l.getLessonSubject().equals("Empty"))
-            {
+        for (Lesson l : list) {
+            if (l.getLessonSubject().equals("Empty")) {
                 return 0;
             }
         }
@@ -651,26 +675,38 @@ public class School {
         return ret;
     }
 
-    public double countElapces() {
+    public double EvalElapces() {
         double count = 0;
         int WorstScore = 0;
         for (int day = 0; day < Schedule.MAX_DAY; day++) {
             for (int hour = 0; hour < Day.MAX_HOUR; hour++) {
                 if (hour != Day.LUNCH_HOUR - Day.STARTING_HOUR) {
-                    count +=countElapcesin(day, hour);
-                    WorstScore+=Classes.size();
+                    count += countElapcesin(day, hour);
+                    WorstScore += Classes.size();
                 }
             }
         }
-        count = ((count /WorstScore)*100);
+        count = ((count / WorstScore) * 100);
         return count;
     }
 
-    public double CountEmptyClassInMidSchrdule(String ClassName) {
+    public int countElapces() {
+        int count = 0;
+        for (int day = 0; day < Schedule.MAX_DAY; day++) {
+            for (int hour = 0; hour < Day.MAX_HOUR; hour++) {
+                if (hour != Day.LUNCH_HOUR - Day.STARTING_HOUR) {
+                    count += countElapcesin(day, hour);
+                }
+            }
+        }
+        return count;
+    }
+
+    public double EvalEmptyClassMidSchrdule(String ClassName) {
         int index = 0;
         double Count = 0;
-        double worstOption=CountWeeklyHours(getSubject(ClassName, "Empty"), ClassName);
-        double Eval =0;
+        double worstOption = CountWeeklyHours(getSubject(ClassName, "Empty"), ClassName);
+        double Eval = 0;
         int ClassIndex = getClassIndexByName(ClassName);
         for (int day = 0; day < Schedule.MAX_DAY; day++) {
             for (int hour = Day.MAX_HOUR - 1; hour > 0; hour--) {
@@ -697,18 +733,52 @@ public class School {
 
             }
         }
-        if(worstOption == 0)
-        {
+        if (worstOption == 0) {
             return 0;
         }
-        Eval = ((Count/worstOption)*100);
+        Eval = ((Count / worstOption) * 100);
         return Eval;
+
+    }
+
+    public int CountEmptyClassMidSchrdule(String ClassName) {
+        int index = 0;
+        int Count = 0;
+        double Eval = 0;
+        int ClassIndex = getClassIndexByName(ClassName);
+        for (int day = 0; day < Schedule.MAX_DAY; day++) {
+            for (int hour = Day.MAX_HOUR - 1; hour > 0; hour--) {
+                if (hour != Day.LUNCH_HOUR - Day.STARTING_HOUR) {
+                    Lesson l = this.schedule.getDays()[day].getHours()[hour].getLessons().get(ClassIndex);
+                    if (l.getClassName() == ClassName) {
+                        if (!l.getLessonSubject().equals("Empty")) {
+                            index = hour;
+                            // worstOption +=(index);
+                            break;
+                        }
+                    }
+                }
+            }
+            for (int hour = 0; hour < index; hour++) {
+                if (hour != Day.LUNCH_HOUR - Day.STARTING_HOUR) {
+                    Lesson l = this.schedule.getDays()[day].getHours()[hour].getLessons().get(ClassIndex);
+                    if (l.getClassName() == ClassName) {
+                        if (l.getLessonSubject().equals("Empty")) {
+                            Count++;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        return Count;
 
     }
 
     public double CountTeachersHourMisMutch() {
         double Count = 0;
-        int worstScore =0;
+        int worstScore = 0;
         for (int i = 0; i < Schedule.MAX_DAY; i++) {
             for (int j = 0; j < Day.MAX_HOUR; j++) {
                 if (j != Day.LUNCH_HOUR - Day.STARTING_HOUR) {
@@ -724,8 +794,27 @@ public class School {
                 }
             }
         }
-        
-        Count = ((Count/worstScore)*100);
+
+        Count = ((Count / worstScore) * 100);
+        return Count;
+    }
+
+    public int CountHourMisMutch() {
+        int Count = 0;
+        for (int i = 0; i < Schedule.MAX_DAY; i++) {
+            for (int j = 0; j < Day.MAX_HOUR; j++) {
+                if (j != Day.LUNCH_HOUR - Day.STARTING_HOUR) {
+                    for (Lesson l : this.schedule.getDays()[i].getHours()[j].getLessons()) {
+                        if (!l.getLessonSubject().equals("Empty")) {
+                            Teacher t = Teachers.get(getTeacherIndex(l.getTeacher()));
+                            if (t.getHourPrefrences()[i][j] == false) {
+                                Count++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return Count;
     }
 

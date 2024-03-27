@@ -222,7 +222,6 @@ public class Page extends VerticalLayout {
         Teacher ilan = new Teacher("ilan");
         Constrains[] ilanConsts = new Constrains[Schedule.MAX_DAY];
         ilanConsts[0] = new Constrains(8, 16);
-        ilanConsts[3] = new Constrains(8, 8);
         ilanConsts[1] = new Constrains(8, 14);
         ilanConsts[4] = new Constrains(8, 10);
         ilan.setConstrains(ilanConsts);
@@ -236,7 +235,7 @@ public class Page extends VerticalLayout {
         Teacher trabelsy = new Teacher("trabelsy");
         Constrains[] trabelsyConsts = new Constrains[Schedule.MAX_DAY];
         trabelsyConsts[1] = new Constrains(8, 16);
-        trabelsyConsts[2] = new Constrains(14, 16);
+        trabelsyConsts[2] = new Constrains(13, 16);
         trabelsyConsts[3] = new Constrains(14, 16);
         trabelsyConsts[4] = new Constrains(8, 14);
         trabelsy.setConstrains(trabelsyConsts);
@@ -250,7 +249,7 @@ public class Page extends VerticalLayout {
         Constrains[] mergiConsts = new Constrains[Schedule.MAX_DAY];
         mergiConsts[0] = new Constrains(15, 16);
         mergiConsts[2] = new Constrains(10, 13);
-        mergiConsts[3] = new Constrains(8, 9);
+        mergiConsts[3] = new Constrains(8, 6);
         mergi.setConstrains(mergiConsts);
         List<Subject> mergisubjects = new ArrayList<>();
         mergisubjects.add(new Subject("nets", mergi.getName()));
@@ -337,7 +336,7 @@ public class Page extends VerticalLayout {
         Lesson l = new Lesson();
         l.setTeacher(ilan.getName());
         l.setHour(0);
-        l.setDay(3);
+        l.setDay(0);
         l.setLessonSubject(c0s3.getSubjectName());
         Created.getClasses().get(0).addLockedLesson(l);
 

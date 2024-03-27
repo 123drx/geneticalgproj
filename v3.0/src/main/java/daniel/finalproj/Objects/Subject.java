@@ -1,12 +1,25 @@
 package daniel.finalproj.Objects;
 
+import java.util.ArrayList;
+
 public class Subject {
     private String SubjectName;
     private String TeachersName;
+    private ArrayList<String> Classes;
     private int WeeklyHours;
     private int priority;
     public Subject()
     {}
+    public void addclass(String Class)
+    {
+        this.Classes.add(Class);
+    }
+    public ArrayList<String> getClasses() {
+        return Classes;
+    }
+    public void setClasses(ArrayList<String> classes) {
+        Classes = classes;
+    }
     public Subject(String SubjectName)
     {
         this.SubjectName = SubjectName;

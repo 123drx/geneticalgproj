@@ -9,8 +9,11 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
@@ -33,6 +36,18 @@ public class ClassPage extends VerticalLayout{
     Principle ThisPrinciple;
     String Proffesion;
     SchoolClass This;
+    TextField SubjectNameField;
+    TextField subjectWeeklyHoursField;
+    TextField SubjectTeacherNameField;
+    TextField SubjectPriorityField;
+    TextField LockedLessonName;
+    TextField LockedLessonTeacher;
+    TextField LockedLessonday;
+    TextField LockedLessonhour;
+    int ClassIndex;
+
+
+
     public ClassPage(PrincipleServies p)
     {
         this.ps = p;
@@ -41,6 +56,7 @@ public class ClassPage extends VerticalLayout{
         ClassName = (String) VaadinSession.getCurrent().getSession().getAttribute("ClassName");
         ThisPrinciple = ps.findbyname(realname);
         ThisSchool = ThisPrinciple.getSchool();
+        ClassIndex = ThisSchool.getClassIndexByName(ClassName);
         This = ThisSchool.getClasses().get(ThisSchool.getClassIndexByName(ClassName));
         if(!Proffesion.equals("Principle"))
         {
@@ -103,7 +119,7 @@ public class ClassPage extends VerticalLayout{
         // TODO add a dialog that create a teacher that exists in the system and adds
         Dialog dialog = new Dialog("Create A New Lesson");
 
-        VerticalLayout dialogLayout = createAddSubejctDialogLayout();
+        VerticalLayout dialogLayout = createLockedLessonDialogLayout();
         dialog.add(dialogLayout);
 
         Button saveButton = createSubjectSaveButton(dialog);
@@ -133,6 +149,47 @@ public class ClassPage extends VerticalLayout{
 
     public void LessonPressed(Lesson leeson)
     {
+
+    }
+
+    public VerticalLayout createLockedLessonDialogLayout()
+    {
+        VerticalLayout vl = new VerticalLayout();
+        TextField LockedLessonName = new TextField("LockedLessonName");
+        TextField LockedLessonTeacher = new TextField("LockedLessonTeacher");
+        TextField LockedLessonday = new TextField("LockedLessonday");
+        TextField LockedLessonhour = new TextField("LockedLessonhour");
+        vl.add(LockedLessonName,LockedLessonTeacher,LockedLessonday,LockedLessonhour);
+        return vl;
+    }
+
+    public Button createLessonSaveButton(Dialog d)
+    {
+        Button saveButton = new Button("Save", event -> { 
+            String name = LockedLessonName.getValue();
+            String Teacher = LockedLessonTeacher.getValue();
+            int day = Integer.parseInt(LockedLessonday.getValue());
+            int hour = Integer.parseInt(LockedLessonhour.getValue());
+            int num = This.getLockedLesson(name);
+            if (num != -1) {
+                Notification.show("A Lesson With that name already Locked");
+            } else {
+                
+                    Lesson lesson = new Lesson();
+                    lesson.setDay(day);
+                    lesson.setClassName(ClassName);
+                    lesson.setHour(hour);
+                    lesson.setLessonSubject(name);
+                    lesson.setTeacher(Teacher);
+                    ThisPrinciple.getSchool().getClasses().get(ClassIndex).addLockedLesson(lesson);
+                    ps.UpdatePrinciple(ThisPrinciple);
+                
+            }
+            System.out.println("Class Name entered: " + name);
+            d.close();
+    });
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        return saveButton;
 
     }
 
@@ -167,15 +224,49 @@ public class ClassPage extends VerticalLayout{
     }
     public VerticalLayout createAddSubejctDialogLayout()
     {
-        VerticalLayout vl = new VerticalLayout();
+          VerticalLayout layout = new VerticalLayout();
+        layout.setPadding(true);
+        layout.setSpacing(true);
 
-        return vl;
+        // Initialize schoolNameField
+        SubjectNameField = new TextField("SubjectName");
+        subjectWeeklyHoursField= new TextField("SubjectWeeklyHours");
+        SubjectTeacherNameField= new TextField("SubjecTeacherName");
+        SubjectPriorityField= new TextField("SubjectPriority");
+        layout.add(SubjectNameField,subjectWeeklyHoursField,SubjectTeacherNameField,SubjectPriorityField);
+
+        return layout;
     }
     public Button createSubjectSaveButton(Dialog d)
     {
-        Button b = new Button();
+        Button saveButton = new Button("Save", event -> { 
+            String subname = SubjectNameField.getValue();
+            int Weekly = Integer.parseInt(subjectWeeklyHoursField.getValue());
+            String Teacher = SubjectTeacherNameField.getValue();
+            int Priority = Integer.parseInt(SubjectPriorityField.getValue());
 
-        return b;
+            int num = This.getSubjectIndex(subname,Teacher);
+            if (num != -1) {
+                Notification.show("A Subject With that name already Exists");
+            } else {
+                int check = ThisPrinciple.getSchool().getClasses().get(ClassIndex).getSubjectIndex(subname,Teacher);
+                if(check==-1)
+                {
+                    Subject sub = new Subject(subname);
+                    sub.setPriority(Priority);
+                    sub.setTeachersName(Teacher);
+                    sub.setWeeklyHours(Weekly);
+
+                    ThisPrinciple.getSchool().getClasses().get(ClassIndex).addSubject(sub);
+                    ps.UpdatePrinciple(ThisPrinciple);
+                }
+            }
+            System.out.println("Class Name entered: " + subname);
+            d.close();
+    });
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        return saveButton;
+
     }
     public void SubjctPressed(Subject sub)
     {
@@ -183,9 +274,7 @@ public class ClassPage extends VerticalLayout{
     }
 
       private void routeToPage(String proffesion) {
-      if (proffesion.equals("Teacher"))
-         UI.getCurrent().getPage().setLocation("/Principle");
-      else  if (proffesion.equals("Principle"))
+    if (proffesion.equals("Principle"))
          UI.getCurrent().getPage().setLocation("/Principle");
       else
          UI.getCurrent().getPage().setLocation("/SignUp");
