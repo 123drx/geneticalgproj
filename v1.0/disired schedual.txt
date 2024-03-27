@@ -1,5 +1,0 @@
-Day 1:  Ilan            Ilan            Ilan            BreakFast               Guy             Guy             Guy                Trabelsy                Trabelsy
-Day 2:  Trabelsy                Trabelsy                Ilan            BreakFast               Ilan            Ilan            Mergi           Mergi           Mergi
-Day 3:  Mergi           Mergi           Guy             BreakFast               Guy            Guy             Trabelsy                Trabelsy                Trabelsy
-Day 4:  Yaniv           Yaniv           Moshe           BreakFast               Moshe             Guy             Guy             Trabelsy                Trabelsy
-Day 5:  Ilan             Ilan            Ilan            BreakFast               Moshe                Moshe           Guy             Guy             Guy
